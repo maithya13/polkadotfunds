@@ -1,0 +1,28 @@
+// Import necessary libraries
+const { ApiPromise, WsProvider, Keyring } = require('@polkadot/api');
+
+async function main() {
+    // Connect to the Substrate node
+    const wsProvider = new WsProvider('wss://rpc.polkadot.io'); // Replace with your node's WebSocket URL
+    const api = await ApiPromise.create({ provider: wsProvider });
+
+    // Create a keyring instance (with sr25519 crypto type)
+    const keyring = new Keyring({ type: 'sr25519' });
+
+    // Add the sender's account (replace with your mnemonic or private key)
+    const sender = keyring.addFromUri('//Alice'); // Replace with actual seed phrase or private key
+
+    // Specify the recipient's address
+    const recipient = '5F3sa2TJAWMqDhXG6jhV4N8ko9xZLqQJbPwhczAaqUGn6iS5'; // Replace with actual address
+
+    // Specify the amount to transfer (in plancks, smallest unit)
+    const amount = 1000000000000; // 1 DOT, adjust for your Substrate chain
+
+    // Create and sign the transaction
+    const transfer = api.tx.balances.transfer(recipient, amount);
+    const hash = await transfer.signAndSend(sender);
+
+    console.log('Transfer sent with hash', hash.toHex());
+}
+
+main().catch(console.error).finally(() => process.exit());
